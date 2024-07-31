@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-notify@0.5.5/dist/simple-notify.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/simple-notify@0.5.5/dist/simple-notify.min.js"></script>
+    <script src="js/script.js"></script>
+    <link rel="stylesheet" href="css/estilo.css">
+</head>
+
+<body>
+    <% if(autenticado.autenticado != null){
+        if(login == 1){%>
+       <script>
+           notify("Login efetuado com sucesso", 
+           "Olá <%= autenticado.autenticado %>", "success", "center")                        
+       </script>
+       <% } 
+       let arquivo={"imagem":"imagem/img-perfil.png"} ;
+       if(autenticado.img_perfil_pasta != null){ 
+            arquivo.imagem = autenticado.img_perfil_pasta;
+       }else if(autenticado.img_perfil_banco != null){ 
+            arquivo.imagem = autenticado.img_perfil_banco;
+       } 
+   %>
+    <span>Olá <%= autenticado.autenticado %>!</span><br>
+    <span><a href="/perfil"><img class="icone-perfil" src="<%= arquivo.imagem %>" </a></span>
+    <p><a href="/sair">sair</a></p>
+
+    <% }else{ %>
+        <span>Olá visitante!</span>
+    <% } %>
+
+        <h1>Autenticação e autorização</h1>
+    <p><a href="/login">Login</a></p>
+    <p><a href="/cadastro">Cadastro</a></p>
+    <p><a href="/adm">Administrador</a></p>
+
+</body>
+
+</html>

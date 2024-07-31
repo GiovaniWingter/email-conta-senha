@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-notify@0.5.5/dist/simple-notify.min.css" />
+    <script src="js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-notify@0.5.5/dist/simple-notify.min.js"></script>
+    <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+    <main>
+        <%
+        let arquivo = {"imagem":"imagem/img-perfil.png"}
+        if(valores.img_perfil_pasta != null){
+            arquivo.imagem = valores.img_perfil_pasta
+        }else if(valores.img_perfil_banco != null){ 
+            arquivo.imagem = valores.img_perfil_banco;
+        }
+        let msgErro = ""
+        let avisoErro = {"nome_usu":"", "email_usu":"",nomeusu_usu:"", fone_usu:"", cep:"", imagem:""}
+        if(listaErros){
+            listaErros.errors.forEach(function(itemErro){
+                if(itemErro.path == "nome_usu"){
+                    avisoErro.nome_usu = "erro";
+                    msgErro += `* ${itemErro.msg} <br>`;
+                }
+                if(itemErro.path == "fone_usu"){
+                    avisoErro.fone_usu = "erro";
+                    msgErro += `* ${itemErro.msg} <br>`;
+                }
+                if(itemErro.path == "nomeusu_usu"){
+                    avisoErro.nomeusu_usu = "erro";
+                    msgErro += `* ${itemErro.msg} <br>`;
+                }
+                if(itemErro.path == "email_usu"){
+                    avisoErro.email_usu = "erro";
+                    msgErro += `* ${itemErro.msg} <br>`;
+                }
+                if(itemErro.path == "cep"){
+                    avisoErro.cep = "erro";
+                    msgErro += `* ${itemErro.msg} <br>`;
+                }
+                if(itemErro.path == "numero"){
+                    avisoErro.numero = "erro";
+                    msgErro += `* ${itemErro.msg} <br>`;
+                }
+                if(itemErro.path == "imagem-perfil_usu"){
+                    avisoErro.imagem = "erro";
+                    msgErro += `* ${itemErro.msg} <br>`;
+                }
+            })
+            if(msgErro != ""){
+                %>
+                    <script>
+                        let msgErro ="<%= msgErro %>"
+                        notify("Erro no preenchimento",
+                        "Verifique o(s) campo(s): <br>" + msgErro.replace(/&lt;/g,"<").replace(/&gt;/g,">"), 
+                        "error", "center",5000)                        
+                    </script>
+                    <%
+
+            }
+        }
+        if (dadosNotificacao) { 
+            %>
+            <script>
+                    notify("<%= dadosNotificacao.titulo%>","<%= dadosNotificacao.mensagem%>", "<%= dadosNotificacao.tipo%>", "center")
+                    if("<%= dadosNotificacao.tipo %>" == "success"){
+                        setTimeout(function(){
+                            window.location="/"
+                        }, 3000)
+                    }                        
+            </script>
+        <% } %>
+        <div id="perfil">
+            <form action="/perfil" method="post" enctype="multipart/form-data">
+                <h1>Meu Perfil</h1>
+                <p>
+                    <input type="text" name="nome_usu" id="nome_usu" placeholder="Nome" value="<%= valores.nome_usu %>" class="<%= avisoErro.nome_usu %>"/> 
+                </p>
+                <p>
+                    <input type="text" name="email_usu" id="email_usu" placeholder="E-mail" value="<%= valores.email_usu %>" class="<%= avisoErro.email_usu %>"/> 
+                </p>
+                <p>
+                    <input type="text" name="nomeusu_usu" id="nomeusu_usu" placeholder="Nome de Usuario" value="<%= valores.nomeusu_usu %>" class="<%= avisoErro.nomeusu_usu %>"/> 
+                </p>
+                <p>
+                    <input type="text" name="fone_usu" id="fone_usu" placeholder="Telefone" value="<%= valores.fone_usu %>" class="<%= avisoErro.fone_usu %>"/> 
+                </p>
+                <p>
+                    <input name="cep" type="text" id="cep" value="<%= valores.cep %>"  placeholder="CEP" class="<%= avisoErro.cep %>"
+                    onblur="pesquisacep(this.value);" onkeyup="mascaraCEP(event)"/><b>*</b>
+                </p>
+                <p>
+                    <input name="rua" type="text" id="rua" placeholder="Rua"  value="<%= valores.logradouro %>"" readonly />
+                </p>
+                <p>
+                    <input name="numero" type="text" id="numero" placeholder="Número" value="<%= valores.numero %>" class="<%= avisoErro.numero %>"/><b>*</b>
+                </p>
+                <p>
+                    <input name="complemento" type="text" id="complemento" placeholder="Complemento" value="<%= valores.complemento %>"/>
+                </p>
+                <p>
+                    <input name="bairro" type="text" id="bairro" placeholder="Bairro" value="<%= valores.bairro %>"" readonly/>
+                </p>
+                <p>
+                    <input name="cidade" type="text" id="cidade" placeholder="Cidade" value="<%= valores.localidade %>"" readonly/>
+                </p>
+                <p>
+                    <input name="uf" type="text" id="uf" placeholder="UF" value="<%= valores.uf %>" readonly/>
+                </p>
+                <p>
+                    <input type="file" class="<%= avisoErro.imagem %>" name="imagem-perfil_usu" id="imagem-perfil_usu" onchange="loadImg(event)">
+                    <img class="img-perfil"  id="img-preview" src="<%= arquivo.imagem %>">
+                </p>
+                <p>
+                    <input type="password" name="senha_usu" id="senha_usu" placeholder="senha de Usuario">
+                    <span class="aviso">Não preencha este campo para manter a senha atual</span>
+                </p>
+                <p>
+                    <input type="submit" value="Alterar dados perfil" />
+                </p>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

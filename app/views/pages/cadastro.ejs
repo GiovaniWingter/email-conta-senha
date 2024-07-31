@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <title>Cadastro</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-notify@0.5.5/dist/simple-notify.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/simple-notify@0.5.5/dist/simple-notify.min.js"></script>
+    <script src="js/script.js"></script>
+    <link rel="stylesheet" href="css/estilo.css">
+
+</head>
+
+<body>
+    <% 
+    let msgErro = "";
+    let avisoErro = {"nome_usu":"", "senha_usu":"",nomeusu_usu:"", senha_usu:""};
+    if(listaErros){
+        listaErros.errors.forEach(function(itemErro){
+            if(itemErro.path == "nome_usu"){
+                avisoErro.nome_usu = "erro";
+                msgErro += `* ${itemErro.msg} <br>`;
+            }
+            if(itemErro.path == "senha_usu"){
+                avisoErro.senha_usu = "erro";
+                msgErro += `* ${itemErro.msg} <br>`;
+            }
+            if(itemErro.path == "nomeusu_usu"){
+                avisoErro.nomeusu_usu = "erro";
+                msgErro += `* ${itemErro.msg} <br>`;
+            }
+            if(itemErro.path == "email_usu"){
+                avisoErro.email_usu = "erro";
+                msgErro += `* ${itemErro.msg} <br>`;
+            }
+        })        
+        if(msgErro != ""){
+        %>
+        <script>
+                let msgErro ="<%= msgErro %>"
+                notify("Erro(s) no preenchimento","Verifique o(s) campo(s) <br>  " + msgErro.replace(/&lt;/g,"<").replace(/&gt;/g,">"),
+                 "error", "center", 5000)                        
+            </script>
+        <%
+        }
+    }
+    if (dadosNotificacao) { %>
+        <script>
+                notify("<%= dadosNotificacao.titulo%>","<%= dadosNotificacao.mensagem%>", "<%= dadosNotificacao.tipo%>", "center")
+                if("<%= dadosNotificacao.tipo %>" == "success"){
+                    setTimeout(function(){window.location="/sair"}, 3000)
+                }                        
+        </script>
+    <% } %>
+    <main>
+        <div class="login-page">
+
+            <div class="form-cadastro">
+                <form class="register-form" method="post" action="/cadastro">
+                    <h2>Cadastro</h2>
+                    <input type="text" placeholder="Nome" name="nome_usu" 
+                        value="<%= valores.nome_usu %>" class="<%= avisoErro.nome_usu %>"/> 
+                    <br>
+                    <input type="text" placeholder="Nome de usuário" name="nomeusu_usu" 
+                        value="<%= valores.nomeusu_usu %>" class="<%= avisoErro.nomeusu_usu %>"/>
+                    <br>
+                    <input type="text" placeholder="e-mail " name="email_usu" 
+                        value="<%= valores.email_usu %>" class="<%= avisoErro.email_usu %>"/>
+                    <br>
+                    <input type="password" placeholder="senha" name="senha_usu" 
+                        value="<%= valores.senha_usu %>" class="<%= avisoErro.senha_usu %>"/>
+                    <br>
+                    <button type="submit">Cadastrar</button><br>
+                    <p class="message">Já é cadastrado? <a href="/login">Entre</a></p>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>

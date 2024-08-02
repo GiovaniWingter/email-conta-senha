@@ -2,9 +2,11 @@ const usuario = require("../models/usuarioModel");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 var salt = bcrypt.genSaltSync(12);
-const {removeImg} = require("../util/removeImg");
+const { removeImg } = require("../util/removeImg");
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const https = require('https');
+
+const nodemailer = require('nodemailer');
 
 const usuarioController = {
 
@@ -41,7 +43,6 @@ const usuarioController = {
             .withMessage("A senha deve ter no mínimo 8 caracteres (mínimo 1 letra maiúscula, 1 caractere especial e 1 número)")
     ],
 
-
     regrasValidacaoPerfil: [
         body("nome_usu")
             .isLength({ min: 3, max: 45 }).withMessage("Nome deve ter de 3 a 45 caracteres!"),
@@ -73,20 +74,51 @@ const usuarioController = {
         }
     },
 
-
-    cadastrar: (req, res) => {
+    cadastrar: async (req, res) => {
         const erros = validationResult(req);
         var dadosForm = {
             user_usuario: req.body.nomeusu_usu,
             senha_usuario: bcrypt.hashSync(req.body.senha_usu, salt),
             nome_usuario: req.body.nome_usu,
             email_usuario: req.body.email_usu,
+            status_usuario: 0
         };
         if (!erros.isEmpty()) {
             return res.render("pages/cadastro", { listaErros: erros, dadosNotificacao: null, valores: req.body })
         }
         try {
-            let create = usuario.create(dadosForm);
+            let create = await usuario.create(dadosForm);
+            console.table(create);
+
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL_USER, // Seu e-mail
+                    pass: process.env.EMAIL_PASS  // Sua senha ou app password
+                },
+                tls: {
+                    rejectUnauthorized: false // ignorar certificados digital - APENAS EM PRODUÇÃO
+                }
+            });
+
+            const to = ""
+            const subject = 'teste email'
+            const text = "teste de envio de email"
+
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to,
+                subject,
+                text
+            };
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error.toString());
+                }
+                res.send('E-mail enviado: ' + info.response);
+            });
+
             res.render("pages/cadastro", {
                 listaErros: null, dadosNotificacao: {
                     titulo: "Cadastro realizado!", mensagem: "Novo usuário criado com sucesso!", tipo: "success"
@@ -102,7 +134,6 @@ const usuarioController = {
         }
     },
 
-
     mostrarPerfil: async (req, res) => {
         try {
             let results = await usuario.findId(req.session.autenticado.id);
@@ -113,15 +144,15 @@ const usuarioController = {
                 const response = await fetch(`https://viacep.com.br/ws/${results[0].cep_usuario}/json/`,
                     { method: 'GET', headers: null, body: null, agent: httpsAgent, });
                 var viaCep = await response.json();
-                var cep = results[0].cep_usuario.slice(0,5)+ "-"+results[0].cep_usuario.slice(5)
-            }else{
-                var viaCep = {logradouro:"", bairro:"", localidade:"", uf:""}
+                var cep = results[0].cep_usuario.slice(0, 5) + "-" + results[0].cep_usuario.slice(5)
+            } else {
+                var viaCep = { logradouro: "", bairro: "", localidade: "", uf: "" }
                 var cep = null;
             }
 
             let campos = {
                 nome_usu: results[0].nome_usuario, email_usu: results[0].email_usuario,
-                cep:  cep, 
+                cep: cep,
                 numero: results[0].numero_usuario,
                 complemento: results[0].complemento_usuario, logradouro: viaCep.logradouro,
                 bairro: viaCep.bairro, localidade: viaCep.localidade, uf: viaCep.uf,
@@ -147,11 +178,11 @@ const usuarioController = {
 
         const erros = validationResult(req);
         const erroMulter = req.session.erroMulter;
-        if (!erros.isEmpty() || erroMulter != null ) {
-            lista =  !erros.isEmpty() ? erros : {formatter:null, errors:[]};
-            if(erroMulter != null ){
+        if (!erros.isEmpty() || erroMulter != null) {
+            lista = !erros.isEmpty() ? erros : { formatter: null, errors: [] };
+            if (erroMulter != null) {
                 lista.errors.push(erroMulter);
-            } 
+            }
             return res.render("pages/perfil", { listaErros: lista, dadosNotificacao: null, valores: req.body })
         }
         try {
@@ -160,7 +191,7 @@ const usuarioController = {
                 nome_usuario: req.body.nome_usu,
                 email_usuario: req.body.email_usu,
                 fone_usuario: req.body.fone_usu,
-                cep_usuario: req.body.cep.replace("-",""),
+                cep_usuario: req.body.cep.replace("-", ""),
                 numero_usuario: req.body.numero,
                 complemento_usuario: req.body.complemento,
                 img_perfil_banco: req.session.autenticado.img_perfil_banco,
@@ -175,7 +206,7 @@ const usuarioController = {
                 //Armazenando o caminho do arquivo salvo na pasta do projeto 
                 caminhoArquivo = "imagem/perfil/" + req.file.filename;
                 //Se houve alteração de imagem de perfil apaga a imagem anterior
-                if(dadosForm.img_perfil_pasta != caminhoArquivo ){
+                if (dadosForm.img_perfil_pasta != caminhoArquivo) {
                     removeImg(dadosForm.img_perfil_pasta);
                 }
                 dadosForm.img_perfil_pasta = caminhoArquivo;
@@ -207,7 +238,7 @@ const usuarioController = {
                         nomeusu_usu: result[0].user_usuario, fone_usu: result[0].fone_usuario, senha_usu: ""
                     }
                     res.render("pages/perfil", { listaErros: null, dadosNotificacao: { titulo: "Perfil! atualizado com sucesso", mensagem: "Alterações Gravadas", tipo: "success" }, valores: campos });
-                }else{
+                } else {
                     res.render("pages/perfil", { listaErros: null, dadosNotificacao: { titulo: "Perfil! atualizado com sucesso", mensagem: "Sem alterações", tipo: "success" }, valores: dadosForm });
                 }
             }

@@ -6,8 +6,7 @@ const { removeImg } = require("../util/removeImg");
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const https = require('https');
 const jwt = require('jsonwebtoken');
-
-const nodemailer = require('nodemailer');
+const { enviarEmail } = require("../util/email");
 
 const usuarioController = {
 
@@ -175,35 +174,8 @@ const usuarioController = {
             let create = await usuario.create(dadosForm);
             console.table(create);
 
-            const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                    user: process.env.EMAIL_USER, // Seu e-mail
-                    pass: process.env.EMAIL_PASS  // Sua senha ou app password
-                },
-                tls: {
-                    rejectUnauthorized: false // ignorar certificado digital - APENAS EM PRODUÇÃO
-                }
-            });
-
-            const to = ""
-            const subject = 'teste email'
-            const text = "teste de envio de email"
-
-            const mailOptions = {
-                from: process.env.EMAIL_USER,
-                to,
-                subject,
-                text
-            };
-
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    console.log(error.toString());
-                }
-                res.send('E-mail enviado: ' + info.response);
-            });
-
+           //enviar e-mail caso o create seja bem sucedido
+            enviarEmail(dadosForm.email_usuario,"Cadastro no site exemplo","Seu cadstro foirealizado com sucesso. Acesse o link abaixo para verificar o seu e-mail e ativar sua conta")
             res.render("pages/cadastro", {
                 listaErros: null, dadosNotificacao: {
                     titulo: "Cadastro realizado!", mensagem: "Novo usuário criado com sucesso!", tipo: "success"

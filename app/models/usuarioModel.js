@@ -42,6 +42,18 @@ var pool = require("../../config/pool_conexoes");
                 return error;
             }
         },
+        findUserCustom: async (criterioWhere) => {
+            try {
+                const [resultados] = await pool.query(
+                    "SELECT *  FROM usuario WHERE ?",
+                    [criterioWhere]
+                )
+                return resultados;
+            } catch (error) {
+                console.log(error);
+                return error;
+            }
+        },
 
         findId: async (id) => {
             try {

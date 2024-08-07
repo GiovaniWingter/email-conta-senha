@@ -5,6 +5,7 @@ var salt = bcrypt.genSaltSync(12);
 const { removeImg } = require("../util/removeImg");
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const https = require('https');
+const jwt = require('jsonwebtoken');
 
 const nodemailer = require('nodemailer');
 
@@ -107,7 +108,13 @@ const usuarioController = {
         }
         try {
             //logica do token
+            user = await usuario.findUserCustom({ 'email_usuario': req.body.email_usu });
+            console.log(user);
+            const token = jwt.sign({ userId: user.id_usuario }, process.env.SECRET_KEY, { expiresIn: '40m' });
+            console.log(token);
+
             //enviar e-mail com link usando o token
+
             res.render("pages/login",{ listaErros: null, dadosNotificacao: { titulo: "Recuperação de senha", mensagem: "Enviamos um e-mail com instruções para resetar sua senha", tipo: "success" } });
         }catch (e) {
             console.log(e);
@@ -117,6 +124,21 @@ const usuarioController = {
     validarTokenNovaSenha: async(req, res) => {
         //receber token da URL
         //validar token
+        jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+            if (err) {
+                return res.status(400).json({ message: 'Token inválido ou expirado' });
+            }
+    
+            const user = users.find(u => u.id === decoded.userId);
+            if (!user) {
+                return res.status(404).json({ message: 'Usuário não encontrado' });
+            }
+    
+            // Atualiza a senha do usuário
+            user.password = newPassword;
+            res.json({ message: 'Senha redefinida com sucesso' });
+        });
+
         //erro
         res.render("pages/rec-senha", { listaErros: null, dadosNotificacao: {titulo: "Link expirado!", mensagem: "Insira seu e-mail para iniciar o reset de senha.", tipo: "error" }, valores: req.body })
         //ok

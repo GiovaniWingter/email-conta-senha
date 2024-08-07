@@ -43,6 +43,31 @@ const usuarioController = {
             .withMessage("A senha deve ter no mínimo 8 caracteres (mínimo 1 letra maiúscula, 1 caractere especial e 1 número)")
     ],
 
+    regrasValidacaoFormNovaSenha: [
+        body("senha_usu")
+            .isStrongPassword()
+            .withMessage("A senha deve ter no mínimo 8 caracteres (mínimo 1 letra maiúscula, 1 caractere especial e 1 número)")
+            .custom(async (value, { req }) => {
+                if (value !== req.body.csenha_usu) {
+                    throw new Error('As senhas não são iguais!');
+                  }
+            }),
+        body("csenha_usu")
+            .isStrongPassword()
+            .withMessage("A senha deve ter no mínimo 8 caracteres (mínimo 1 letra maiúscula, 1 caractere especial e 1 número)"),
+    ],
+
+    regrasValidacaoFormRecSenha: [
+        body("email_usu")
+            .isEmail().withMessage("Digite um e-mail válido!")
+            .custom(async value => {
+                const nomeUsu = await usuario.findCampoCustom({ 'email_usuario': value });
+                if (nomeUsu == 0) {
+                    throw new Error('E-mail não encontrado');
+                }
+            })        
+    ],
+
     regrasValidacaoPerfil: [
         body("nome_usu")
             .isLength({ min: 3, max: 45 }).withMessage("Nome deve ter de 3 a 45 caracteres!"),
@@ -74,6 +99,44 @@ const usuarioController = {
         }
     },
 
+    recuperarSenha: async (req, res) => {
+        const erros = validationResult(req);
+        console.log(erros);
+        if (!erros.isEmpty()) {
+            return res.render("pages/rec-senha", { listaErros: erros, dadosNotificacao: null, valores: req.body })
+        }
+        try {
+            //logica do token
+            //enviar e-mail com link usando o token
+            res.render("pages/login",{ listaErros: null, dadosNotificacao: { titulo: "Recuperação de senha", mensagem: "Enviamos um e-mail com instruções para resetar sua senha", tipo: "success" } });
+        }catch (e) {
+            console.log(e);
+        }
+    },
+ 
+    validarTokenNovaSenha: async(req, res) => {
+        //receber token da URL
+        //validar token
+        //erro
+        res.render("pages/rec-senha", { listaErros: null, dadosNotificacao: {titulo: "Link expirado!", mensagem: "Insira seu e-mail para iniciar o reset de senha.", tipo: "error" }, valores: req.body })
+        //ok
+        res.render("pages/resetar-senha",{ listaErros: null, dadosNotificacao: null });
+    },
+
+    resetarSenha: async (req, res) => {
+        const erros = validationResult(req);
+        console.log(erros);
+        if (!erros.isEmpty()) {
+            return res.render("pages/resetar-senha", { listaErros: erros, dadosNotificacao: null, valores: req.body })
+        }
+        try {
+            //gravar nova senha           
+           res.render("pages/login",{ listaErros: null, dadosNotificacao: { titulo: "Perfil alterado", mensagem: "Nova senha registrada", tipo: "success" } });
+        }catch (e) {
+            console.log(e);
+        }
+    },
+
     cadastrar: async (req, res) => {
         const erros = validationResult(req);
         var dadosForm = {
@@ -97,7 +160,7 @@ const usuarioController = {
                     pass: process.env.EMAIL_PASS  // Sua senha ou app password
                 },
                 tls: {
-                    rejectUnauthorized: false // ignorar certificados digital - APENAS EM PRODUÇÃO
+                    rejectUnauthorized: false // ignorar certificado digital - APENAS EM PRODUÇÃO
                 }
             });
 

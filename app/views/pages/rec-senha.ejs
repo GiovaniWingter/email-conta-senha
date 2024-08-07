@@ -14,16 +14,12 @@
 <body>
     <main>
         <% 
-            let avisoErro = {"nome_usu":"", "senha_usu":""}
+            let avisoErro = {"email_usu":""}
             let msgErro = ""
                 if(listaErros){
                     listaErros.errors.forEach(function(itemErro){
-                        if(itemErro.path == "nome_usu"){
-                            avisoErro.nome_usu = "erro";
-                            msgErro += `* ${itemErro.msg} <br>`
-                        }
-                        if(itemErro.path == "senha_usu"){
-                            avisoErro.senha_usu = "erro";
+                        if(itemErro.path == "email_usu"){
+                            avisoErro.email_usu = "erro";
                             msgErro += `* ${itemErro.msg} <br>`
                         }
                     })
@@ -48,16 +44,12 @@
                 <% } %>              
                 <div class="login-page">
                     <div class="form-cadastro">
-                        <h2>Login</h2>
-                        <form action="/login" method="post">
-                            <input type="text" name="nome_usu" placeholder="Nome de usuáio ou e-mail" value="helvinha"
-                                class="<%= avisoErro.nome_usu %>" /><br>
-                           <input type="password" name="senha_usu" placeholder="senha" value="Teste@123"
-                                class="<%=  avisoErro.senha_usu %>" /><br>
-                                <p class="message">Esqueceu a senha? <a href="/recuperar-senha">Recuperar senha</a></p>
-                           <button type="submit">Entrar</button><br>
+                        <h2>Recuperar a senha</h2>
+                        <form action="/recuperar-senha" method="post">
+                            <input type="text" name="email_usu" placeholder="e-mail" value=""
+                                class="<%= avisoErro.email_usu %>" /><br>
+                           <button type="submit">Enviar</button><br>
                         </form>
-                        <p class="message">Não é cadastrado? <a href="/cadastro">Crie uma conta</a></p>
                     </div>
                 </div>
     </main>

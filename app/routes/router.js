@@ -31,6 +31,27 @@ router.post(
   }
 );
 
+router.get("/recuperar-senha", function(req, res){
+  res.render("pages/rec-senha",{ listaErros: null, dadosNotificacao: null });
+});
+
+router.get("/reset-senha", 
+  function(req, res){
+    
+  });
+  
+router.post("/reset-senha", 
+    usuarioController.regrasValidacaoFormNovaSenha,
+  function(req, res){
+    usuarioController.resetarSenha(req, res);
+});
+  
+  
+router.post("/recuperar-senha",
+  usuarioController.regrasValidacaoFormRecSenha, 
+  function(req, res){
+    usuarioController.recuperarSenha(req, res);
+});
 
 router.get("/", verificarUsuAutenticado, function (req, res) {
   res.render("pages/index", {

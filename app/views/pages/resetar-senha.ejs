@@ -14,16 +14,16 @@
 <body>
     <main>
         <% 
-            let avisoErro = {"nome_usu":"", "senha_usu":""}
+            let avisoErro = {"senha_usu":"","csenha_usu":""}
             let msgErro = ""
                 if(listaErros){
                     listaErros.errors.forEach(function(itemErro){
-                        if(itemErro.path == "nome_usu"){
-                            avisoErro.nome_usu = "erro";
-                            msgErro += `* ${itemErro.msg} <br>`
-                        }
                         if(itemErro.path == "senha_usu"){
                             avisoErro.senha_usu = "erro";
+                            msgErro += `* ${itemErro.msg} <br>`
+                        }
+                        if(itemErro.path == "csenha_usu"){
+                            avisoErro.csenha_usu = "erro";
                             msgErro += `* ${itemErro.msg} <br>`
                         }
                     })
@@ -48,16 +48,14 @@
                 <% } %>              
                 <div class="login-page">
                     <div class="form-cadastro">
-                        <h2>Login</h2>
-                        <form action="/login" method="post">
-                            <input type="text" name="nome_usu" placeholder="Nome de usuáio ou e-mail" value="helvinha"
-                                class="<%= avisoErro.nome_usu %>" /><br>
-                           <input type="password" name="senha_usu" placeholder="senha" value="Teste@123"
-                                class="<%=  avisoErro.senha_usu %>" /><br>
-                                <p class="message">Esqueceu a senha? <a href="/recuperar-senha">Recuperar senha</a></p>
+                        <h2>Resetar senha</h2>
+                        <form action="/reset-senha" method="post">
+                            <input type="text" name="senha_usu" placeholder="Nova senha" value=""
+                                class="<%= avisoErro.senha_usu %>" /><br>
+                           <input type="password" name="csenha_usu" placeholder="Repita a senha" value=""
+                                class="<%=  avisoErro.csenha_usu %>" /><br>
                            <button type="submit">Entrar</button><br>
                         </form>
-                        <p class="message">Não é cadastrado? <a href="/cadastro">Crie uma conta</a></p>
                     </div>
                 </div>
     </main>

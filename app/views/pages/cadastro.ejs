@@ -60,16 +60,20 @@
                 <form class="register-form" method="post" action="/cadastro">
                     <h2>Cadastro</h2>
                     <input type="text" placeholder="Nome" name="nome_usu" 
-                        value="<%= valores.nome_usu %>" class="<%= avisoErro.nome_usu %>"/> 
+                        value="Teste 123" class="<%= avisoErro.nome_usu %>"/> 
+                        <!-- value="<%= valores.nome_usu %>" class="<%= avisoErro.nome_usu %>"/>  -->
                     <br>
                     <input type="text" placeholder="Nome de usuário" name="nomeusu_usu" 
-                        value="<%= valores.nomeusu_usu %>" class="<%= avisoErro.nomeusu_usu %>"/>
+                        value="Teste 123" class="<%= avisoErro.nomeusu_usu %>"/>
+                        <!-- value="<%= valores.nomeusu_usu %>" class="<%= avisoErro.nomeusu_usu %>"/> -->
                     <br>
                     <input type="text" placeholder="e-mail " name="email_usu" 
-                        value="<%= valores.email_usu %>" class="<%= avisoErro.email_usu %>"/>
+                        value="giovani.wingter@docente.fieb.edu.br" class="<%= avisoErro.email_usu %>"/>
+                        <!-- value="<%= valores.email_usu %>" class="<%= avisoErro.email_usu %>"/> -->
                     <br>
                     <input type="password" placeholder="senha" name="senha_usu" 
-                        value="<%= valores.senha_usu %>" class="<%= avisoErro.senha_usu %>"/>
+                        value="12345@Aa" class="<%= avisoErro.senha_usu %>"/>
+                        <!-- value="<%= valores.senha_usu %>" class="<%= avisoErro.senha_usu %>"/> -->
                     <br>
                     <button type="submit">Cadastrar</button><br>
                     <p class="message">Já é cadastrado? <a href="/login">Entre</a></p>

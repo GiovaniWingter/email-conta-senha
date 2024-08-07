@@ -171,8 +171,8 @@ const usuarioController = {
             return res.render("pages/cadastro", { listaErros: erros, dadosNotificacao: null, valores: req.body })
         }
         try {
-            let create = await usuario.create(dadosForm);
-            console.table(create);
+            // let create = await usuario.create(dadosForm);
+            // console.table(create);
 
            //enviar e-mail caso o create seja bem sucedido
             enviarEmail(dadosForm.email_usuario,"Cadastro no site exemplo","Seu cadstro foirealizado com sucesso. Acesse o link abaixo para verificar o seu e-mail e ativar sua conta")

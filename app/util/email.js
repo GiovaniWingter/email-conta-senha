@@ -17,15 +17,19 @@ const transporter = nodemailer.createTransport({
 
 
 
-function enviarEmail(to, subject, text) {
+function enviarEmail(to, subject, text=null, html = null) {
 
 
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to,
-        subject,
-        text
+        subject
     };
+    if(text!= null){
+        mailOptions.text = text;
+    }else if(html != null){
+        mailOptions.html = html
+    }
 
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {

@@ -65,6 +65,24 @@ var pool = require("../../config/pool_conexoes");
                     "FROM usuario u, tipo_usuario t where u.status_usuario = 1 and " +
                     "u.tipo_usuario = t.id_tipo_usuario and u.id_usuario = ? ", [id]
                 )
+                console.log(resultados);
+                return resultados;
+            } catch (error) {
+                console.log(error);
+                return error;
+            }
+        },
+        findInativoId: async (id) => {
+            try {
+                const [resultados] = await pool.query(
+                    "SELECT u.id_usuario, u.nome_usuario, u.user_usuario, " +
+                    "u.senha_usuario, u.email_usuario, u.fone_usuario, u.tipo_usuario, " +
+                    "u.status_usuario,u.numero_usuario, u.cep_usuario,u.img_perfil_banco, u.img_perfil_pasta," +
+                    "t.id_tipo_usuario, t.descricao_usuario " +
+                    "FROM usuario u, tipo_usuario t where u.status_usuario = 0 and " +
+                    "u.tipo_usuario = t.id_tipo_usuario and u.id_usuario = ? ", [id]
+                )
+                console.log(resultados);
                 return resultados;
             } catch (error) {
                 console.log(error);

@@ -41,7 +41,7 @@
                 if (dadosNotificacao) { %>
                     <script>
                             notify("<%= dadosNotificacao.titulo%>","<%= dadosNotificacao.mensagem%>", "<%= dadosNotificacao.tipo%>", "center")
-                            if("<%= dadosNotificacao.tipo %>" == "success"){
+                            if("<%= dadosNotificacao.tipo %>" == "success" & "<%= dadosNotificacao.titulo %>" == "Successo" ){
                                 setTimeout(function(){window.location="/"}, 3000)
                             }                        
                     </script>

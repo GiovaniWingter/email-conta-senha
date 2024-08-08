@@ -26,7 +26,21 @@
        }else if(autenticado.img_perfil_banco != null){ 
             arquivo.imagem = autenticado.img_perfil_banco;
        } 
-   %>
+       
+       if (dadosNotificacao) { 
+            %>
+            <script>
+                    notify("<%= dadosNotificacao.titulo%>","<%= dadosNotificacao.mensagem%>", "<%= dadosNotificacao.tipo%>", "center")
+                    if("<%= dadosNotificacao.tipo %>" == "success"){
+                        setTimeout(function(){
+                            window.location="/"
+                        }, 3000)
+                    }                        
+            </script>
+        <% } %>
+       %>
+
+   
     <span>Olá <%= autenticado.autenticado %>!</span><br>
     <span><a href="/perfil"><img class="icone-perfil" src="<%= arquivo.imagem %>" </a></span>
     <p><a href="/sair">sair</a></p>

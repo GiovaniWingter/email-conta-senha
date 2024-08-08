@@ -94,6 +94,16 @@ router.post(
 );
 
 router.get(
+  "/ativar-conta",
+  verificarUsuAutenticado,
+  async function (req, res) {
+    usuarioController.ativarConta(req, res);
+  }
+);
+
+
+
+router.get(
   "/adm",
   verificarUsuAutenticado,
   verificarUsuAutorizado([2, 3], "pages/restrito"),

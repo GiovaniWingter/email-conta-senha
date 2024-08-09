@@ -12,9 +12,9 @@ const transporter = nodemailer.createTransport({
         secure: false,
         ignoreTLS: true,
         rejectUnauthorized: false, // ignorar certificado digital - APENAS EM PRODUÇÃO
-        maxVersion: 'TLSv1.3',
-        minVersion: 'TLSv1.2',
-        ciphers: 'TLS_AES_128_GCM_SHA256',
+        // maxVersion: 'TLSv1.3',
+        // minVersion: 'TLSv1.2',
+        // ciphers: 'TLS_AES_128_GCM_SHA256',
     }
 
 });

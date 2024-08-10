@@ -8,6 +8,7 @@ const fetch = (...args) =>
 const https = require("https");
 const jwt = require("jsonwebtoken");
 const { enviarEmail } = require("../util/email");
+const emailAtivarConta = require("../util/email-ativar-conta");
 
 const usuarioController = {
   regrasValidacaoFormLogin: [
@@ -105,7 +106,12 @@ const usuarioController = {
       });
     }
     if (req.session.autenticado.autenticado != null) {
-      res.redirect("/");
+      return res.render("pages/index", {
+        listaErros: erros,
+        autenticado: req.session.autenticado,
+        login: req.session.logado,
+        dadosNotificacao: null,
+      });
     } else {
       res.render("pages/login", {
         listaErros: null,
@@ -133,18 +139,16 @@ const usuarioController = {
       user = await usuario.findUserCustom({
         email_usuario: req.body.email_usu,
       });
-      console.log(user);
       const token = jwt.sign(
-        { userId: user.id_usuario },
-        process.env.SECRET_KEY,
-        { expiresIn: "40m" }
+        { userId: user[0].id_usuario, expiresIn: "40m" },
+        process.env.SECRET_KEY
       );
-      console.log(token);
-
       //enviar e-mail com link usando o token
-
-      res.render("pages/login", {
+      html = require("../util/email-reset-senha")('https://supreme-zebra-g5wx665q6r3w6gv-3000.app.github.dev', token)
+      enviarEmail(req.body.email_usu, "Pedido de recuperação de senha", null, html);
+      res.render("pages/index", {
         listaErros: null,
+        autenticado: req.session.autenticado,
         dadosNotificacao: {
           titulo: "Recuperação de senha",
           mensagem: "Enviamos um e-mail com instruções para resetar sua senha",
@@ -158,36 +162,26 @@ const usuarioController = {
 
   validarTokenNovaSenha: async (req, res) => {
     //receber token da URL
+
+    const token = req.query.token;
+    console.log(token);
     //validar token
     jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+
       if (err) {
-        return res.status(400).json({ message: "Token inválido ou expirado" });
+        res.render("pages/rec-senha", {
+          listaErros: null,
+          dadosNotificacao: { titulo: "Link expirado!", mensagem: "Insira seu e-mail para iniciar o reset de senha.", tipo: "error", },
+          valores: req.body
+        });
+      } else {
+        res.render("pages/resetar-senha", {
+          listaErros: null,
+          autenticado: req.session.autenticado,
+          id_usuario: decoded.userId,
+          dadosNotificacao: null
+        });
       }
-
-      const user = users.find((u) => u.id === decoded.userId);
-      if (!user) {
-        return res.status(404).json({ message: "Usuário não encontrado" });
-      }
-
-      // Atualiza a senha do usuário
-      user.password = newPassword;
-      res.json({ message: "Senha redefinida com sucesso" });
-    });
-
-    //erro
-    res.render("pages/rec-senha", {
-      listaErros: null,
-      dadosNotificacao: {
-        titulo: "Link expirado!",
-        mensagem: "Insira seu e-mail para iniciar o reset de senha.",
-        tipo: "error",
-      },
-      valores: req.body,
-    });
-    //ok
-    res.render("pages/resetar-senha", {
-      listaErros: null,
-      dadosNotificacao: null,
     });
   },
 
@@ -203,6 +197,9 @@ const usuarioController = {
     }
     try {
       //gravar nova senha
+      senha = bcrypt.hashSync(req.body.senha_usu);
+      const resetar = await usuario.update({ senha_usuario: senha }, req.body.id_usuario);
+      console.log(resetar);
       res.render("pages/login", {
         listaErros: null,
         dadosNotificacao: {
@@ -242,79 +239,11 @@ const usuarioController = {
         process.env.SECRET_KEY
       );
       console.log(token);
-      const html = ` <!DOCTYPE html>
-            <html lang="pt-br">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Ativação de Conta</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        background-color: #f4f4f4;
-                        margin: 0;
-                        padding: 0;
-                    }
-                    .container {
-                        background-color: #ffffff;
-                        margin: 50px auto;
-                        padding: 20px;
-                        border-radius: 8px;
-                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                        max-width: 600px;
-                    }
-                    .header {
-                        background-color: #4CAF50;
-                        color: white;
-                        padding: 10px 20px;
-                        text-align: center;
-                        border-radius: 8px 8px 0 0;
-                    }
-                    .content {
-                        padding: 20px;
-                        text-align: center;
-                    }
-                    .content p {
-                        font-size: 16px;
-                    }
-                    .button {
-                        display: inline-block;
-                        padding: 10px 20px;
-                        margin-top: 20px;
-                        background-color: #4CAF50;
-                        color: white;
-                        text-decoration: none;
-                        border-radius: 5px;
-                    }
-                    .footer {
-                        padding: 10px 20px;
-                        text-align: center;
-                        font-size: 12px;
-                        color: #777777;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="header">
-                        <h1>Bem-vindo(a)!</h1>
-                    </div>
-                    <div class="content">
-                        <p>Obrigado por se cadastrar. Por favor, clique no botão abaixo para ativar sua conta:</p>
-                        <a href="http://localhost:3000/ativar-conta?token=${token}" class="button">Ativar Conta</a>
-                    </div>
-                    <div class="footer">
-                        <p>Se você não solicitou este email, por favor ignore-o.</p>
-                    </div>
-                </div>
-            </body>
-            </html>`;
-      enviarEmail(
-        dadosForm.email_usuario,
-        "Cadastro no site exemplo",
-        null,
-        html
-      );
+
+      const html = require('../util/email-ativar-conta')('https://supreme-zebra-g5wx665q6r3w6gv-3000.app.github.dev', token);
+
+      enviarEmail(dadosForm.email_usuario, "Cadastro no site exemplo", null, html);
+
       res.render("pages/cadastro", {
         listaErros: null,
         dadosNotificacao: {
@@ -343,26 +272,27 @@ const usuarioController = {
       const token = req.query.token;
       console.log(token);
 
-      jwt.verify(token, process.env.SECRET_KEY,  (err, decoded) => {
+      jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+        console.log(decoded);
         if (err) {
           console.log({ message: "Token inválido ou expirado" });
         } else {
-          const user =  usuario.findInativoId(decoded.userId);
+          const user = usuario.findInativoId(decoded.userId);
           if (!user) {
             console.log({ message: "Usuário não encontrado" });
           } else {
-            let resultUpdate =  usuario.update({status_usuario: 1},decoded.userId);
+            let resultUpdate = usuario.update({ status_usuario: 1 }, decoded.userId);
             console.log({ message: "Conta ativada" });
-            
+
             res.render("pages/login", {
-                listaErros: null,
-                autenticado: req.session.autenticado,
-                dadosNotificacao: {
-                  titulo: "Sucesso",
-                  mensagem: "Conta ativada, use seu e-mail e senha para acessar o seu perfil!",
-                  tipo: "success",
-                },
-          });
+              listaErros: null,
+              autenticado: req.session.autenticado,
+              dadosNotificacao: {
+                titulo: "Sucesso",
+                mensagem: "Conta ativada, use seu e-mail e senha para acessar o seu perfil!",
+                tipo: "success",
+              },
+            });
 
           }
 
@@ -409,8 +339,8 @@ const usuarioController = {
         img_perfil_banco:
           results[0].img_perfil_banco != null
             ? `data:image/jpeg;base64,${results[0].img_perfil_banco.toString(
-                "base64"
-              )}`
+              "base64"
+            )}`
             : null,
         nomeusu_usu: results[0].user_usuario,
         fone_usu: results[0].fone_usuario,
@@ -510,8 +440,8 @@ const usuarioController = {
             img_perfil_banco:
               result[0].img_perfil_banco != null
                 ? `data:image/jpeg;base64,${result[0].img_perfil_banco.toString(
-                    "base64"
-                  )}`
+                  "base64"
+                )}`
                 : null,
             img_perfil_pasta: result[0].img_perfil_pasta,
           };

@@ -107,7 +107,7 @@ const usuarioController = {
       });
     }
     if (req.session.autenticado.autenticado != null) {
-return res.render("pages/index", {
+      return res.render("pages/index", {
         listaErros: erros,
         autenticado: req.session.autenticado,
         login: req.session.logado,

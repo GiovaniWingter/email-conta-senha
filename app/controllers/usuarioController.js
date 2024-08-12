@@ -8,6 +8,7 @@ const fetch = (...args) =>
 const https = require("https");
 const jwt = require("jsonwebtoken");
 const { enviarEmail } = require("../util/email");
+
 const emailAtivarConta = require("../util/email-ativar-conta");
 
 const usuarioController = {
@@ -106,7 +107,7 @@ const usuarioController = {
       });
     }
     if (req.session.autenticado.autenticado != null) {
-      return res.render("pages/index", {
+return res.render("pages/index", {
         listaErros: erros,
         autenticado: req.session.autenticado,
         login: req.session.logado,
@@ -308,6 +309,7 @@ const usuarioController = {
         if (err) {
           console.log({ message: "Token inválido ou expirado" });
         } else {
+
           const user = usuario.findInativoId(decoded.userId);
           const user = usuario.findInativoId(decoded.userId);
           if (!user) {
@@ -335,6 +337,7 @@ const usuarioController = {
                 tipo: "success",
               },
             });
+
 
           }
 

@@ -9,6 +9,7 @@ const https = require("https");
 const jwt = require("jsonwebtoken");
 const { enviarEmail } = require("../util/email");
 const emailAtivarConta = require("../util/email-ativar-conta");
+const emailAtivarConta = require("../util/email-ativar-conta");
 
 const usuarioController = {
   regrasValidacaoFormLogin: [
@@ -112,6 +113,12 @@ const usuarioController = {
         login: req.session.logado,
         dadosNotificacao: null,
       });
+      return res.render("pages/index", {
+        listaErros: erros,
+        autenticado: req.session.autenticado,
+        login: req.session.logado,
+        dadosNotificacao: null,
+      });
     } else {
       res.render("pages/login", {
         listaErros: null,
@@ -142,12 +149,15 @@ const usuarioController = {
       const token = jwt.sign(
         { userId: user[0].id_usuario, expiresIn: "40m" },
         process.env.SECRET_KEY
+        { userId: user[0].id_usuario, expiresIn: "40m" },
+        process.env.SECRET_KEY
       );
       //enviar e-mail com link usando o token
-      html = require("../util/email-reset-senha")('https://supreme-zebra-g5wx665q6r3w6gv-3000.app.github.dev', token)
+      html = require("../util/email-reset-senha")(process.env.URL_BASE, token)
       enviarEmail(req.body.email_usu, "Pedido de recuperação de senha", null, html);
       res.render("pages/index", {
         listaErros: null,
+        autenticado: req.session.autenticado,
         autenticado: req.session.autenticado,
         dadosNotificacao: {
           titulo: "Recuperação de senha",
@@ -165,10 +175,27 @@ const usuarioController = {
 
     const token = req.query.token;
     console.log(token);
+
+    const token = req.query.token;
+    console.log(token);
     //validar token
     jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
 
+
       if (err) {
+        res.render("pages/rec-senha", {
+          listaErros: null,
+          dadosNotificacao: { titulo: "Link expirado!", mensagem: "Insira seu e-mail para iniciar o reset de senha.", tipo: "error", },
+          valores: req.body
+        });
+      } else {
+        res.render("pages/resetar-senha", {
+          listaErros: null,
+          autenticado: req.session.autenticado,
+          id_usuario: decoded.userId,
+          dadosNotificacao: null
+        });
+      }
         res.render("pages/rec-senha", {
           listaErros: null,
           dadosNotificacao: { titulo: "Link expirado!", mensagem: "Insira seu e-mail para iniciar o reset de senha.", tipo: "error", },
@@ -197,6 +224,9 @@ const usuarioController = {
     }
     try {
       //gravar nova senha
+      senha = bcrypt.hashSync(req.body.senha_usu);
+      const resetar = await usuario.update({ senha_usuario: senha }, req.body.id_usuario);
+      console.log(resetar);
       senha = bcrypt.hashSync(req.body.senha_usu);
       const resetar = await usuario.update({ senha_usuario: senha }, req.body.id_usuario);
       console.log(resetar);
@@ -240,7 +270,7 @@ const usuarioController = {
       );
       console.log(token);
 
-      const html = require('../util/email-ativar-conta')('https://supreme-zebra-g5wx665q6r3w6gv-3000.app.github.dev', token);
+      const html = require('../util/email-ativar-conta')(process.env.URL_BASE, token);
 
       enviarEmail(dadosForm.email_usuario, "Cadastro no site exemplo", null, html);
 
@@ -274,17 +304,30 @@ const usuarioController = {
 
       jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
         console.log(decoded);
+      jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+        console.log(decoded);
         if (err) {
           console.log({ message: "Token inválido ou expirado" });
         } else {
+          const user = usuario.findInativoId(decoded.userId);
           const user = usuario.findInativoId(decoded.userId);
           if (!user) {
             console.log({ message: "Usuário não encontrado" });
           } else {
             let resultUpdate = usuario.update({ status_usuario: 1 }, decoded.userId);
+            let resultUpdate = usuario.update({ status_usuario: 1 }, decoded.userId);
             console.log({ message: "Conta ativada" });
 
+
             res.render("pages/login", {
+              listaErros: null,
+              autenticado: req.session.autenticado,
+              dadosNotificacao: {
+                titulo: "Sucesso",
+                mensagem: "Conta ativada, use seu e-mail e senha para acessar o seu perfil!",
+                tipo: "success",
+              },
+            });
               listaErros: null,
               autenticado: req.session.autenticado,
               dadosNotificacao: {
@@ -339,6 +382,8 @@ const usuarioController = {
         img_perfil_banco:
           results[0].img_perfil_banco != null
             ? `data:image/jpeg;base64,${results[0].img_perfil_banco.toString(
+              "base64"
+            )}`
               "base64"
             )}`
             : null,
@@ -440,6 +485,8 @@ const usuarioController = {
             img_perfil_banco:
               result[0].img_perfil_banco != null
                 ? `data:image/jpeg;base64,${result[0].img_perfil_banco.toString(
+                  "base64"
+                )}`
                   "base64"
                 )}`
                 : null,

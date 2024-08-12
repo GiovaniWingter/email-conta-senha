@@ -9,7 +9,6 @@ const https = require("https");
 const jwt = require("jsonwebtoken");
 const { enviarEmail } = require("../util/email");
 const emailAtivarConta = require("../util/email-ativar-conta");
-const emailAtivarConta = require("../util/email-ativar-conta");
 
 const usuarioController = {
   regrasValidacaoFormLogin: [

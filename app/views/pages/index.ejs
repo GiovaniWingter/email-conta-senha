@@ -26,18 +26,6 @@
        }else if(autenticado.img_perfil_banco != null){ 
             arquivo.imagem = autenticado.img_perfil_banco;
        } 
-       
-       if (dadosNotificacao) { 
-            %>
-            <script>
-                    notify("<%= dadosNotificacao.titulo%>","<%= dadosNotificacao.mensagem%>", "<%= dadosNotificacao.tipo%>", "center")
-                    if("<%= dadosNotificacao.tipo %>" == "success"){
-                        setTimeout(function(){
-                            window.location="/"
-                        }, 3000)
-                    }                        
-            </script>
-        <% } %>
        %>
 
    
@@ -49,6 +37,14 @@
         <span>Olá visitante!</span>
     <% } %>
 
+    <%
+    if (dadosNotificacao) { 
+        %>
+        <script>
+                notify("<%= dadosNotificacao.titulo%>","<%= dadosNotificacao.mensagem%>", "<%= dadosNotificacao.tipo%>", "center")
+                                      
+        </script>
+    <% } %>
         <h1>Autenticação e autorização</h1>
     <p><a href="/login">Login</a></p>
     <p><a href="/cadastro">Cadastro</a></p>

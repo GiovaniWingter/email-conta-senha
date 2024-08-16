@@ -31,11 +31,12 @@ router.post(
   }
 );
 
-router.get("/recuperar-senha", function(req, res){
+router.get("/recuperar-senha", verificarUsuAutenticado, function(req, res){
   res.render("pages/rec-senha",{ listaErros: null, dadosNotificacao: null });
 });
 
 router.post("/recuperar-senha",
+  verificarUsuAutenticado,
   usuarioController.regrasValidacaoFormRecSenha, 
   function(req, res){
     usuarioController.recuperarSenha(req, res);
@@ -59,6 +60,7 @@ router.get("/", verificarUsuAutenticado, function (req, res) {
   res.render("pages/index", {
     autenticado: req.session.autenticado,
     login: req.session.logado,
+    dadosNotificacao:null
   });
 });
 

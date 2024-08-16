@@ -21,7 +21,7 @@ const transporter = nodemailer.createTransport({
 
 
 
-function enviarEmail(to, subject, text=null, html = null) {
+function enviarEmail(to, subject, text=null, html = null, callback) {
 
 
     const mailOptions = {
@@ -39,7 +39,11 @@ function enviarEmail(to, subject, text=null, html = null) {
         if (error) {
             console.log(error);
         } else {
-            console.log("email enviado")
+            console.log("email enviado");
+            if (callback && typeof callback === 'function') {
+                // Chama a função de callback passando o resultado
+                callback();
+            } 
         }
     });
 

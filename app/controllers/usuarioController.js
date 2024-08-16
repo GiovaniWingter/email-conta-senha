@@ -113,12 +113,6 @@ const usuarioController = {
         login: req.session.logado,
         dadosNotificacao: null,
       });
-      return res.render("pages/index", {
-        listaErros: erros,
-        autenticado: req.session.autenticado,
-        login: req.session.logado,
-        dadosNotificacao: null,
-      });
     } else {
       res.render("pages/login", {
         listaErros: null,
@@ -152,17 +146,18 @@ const usuarioController = {
       );
       //enviar e-mail com link usando o token
       html = require("../util/email-reset-senha")(process.env.URL_BASE, token)
-      enviarEmail(req.body.email_usu, "Pedido de recuperação de senha", null, html);
-      res.render("pages/index", {
-        listaErros: null,
-        autenticado: req.session.autenticado,
-        autenticado: req.session.autenticado,
-        dadosNotificacao: {
-          titulo: "Recuperação de senha",
-          mensagem: "Enviamos um e-mail com instruções para resetar sua senha",
-          tipo: "success",
-        },
+      enviarEmail(req.body.email_usu, "Pedido de recuperação de senha", null, html, ()=>{
+        return res.render("pages/index", {
+          listaErros: null,
+          autenticado: req.session.autenticado,
+          dadosNotificacao: {
+            titulo: "Recuperação de senha",
+            mensagem: "Enviamos um e-mail com instruções para resetar sua senha",
+            tipo: "success",
+          },
+        });
       });
+
     } catch (e) {
       console.log(e);
     }
@@ -175,8 +170,6 @@ const usuarioController = {
     console.log(token);
     //validar token
     jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
-
-
       if (err) {
         res.render("pages/rec-senha", {
           listaErros: null,
@@ -191,7 +184,6 @@ const usuarioController = {
           dadosNotificacao: null
         });
       }
-
     });
   },
 
@@ -241,28 +233,26 @@ const usuarioController = {
     }
     try {
       let create = await usuario.create(dadosForm);
-
       //enviar e-mail caso o create seja bem sucedido
-
       const token = jwt.sign(
         { userId: create.insertId },
         process.env.SECRET_KEY
       );
       console.log(token);
-
       const html = require('../util/email-ativar-conta')(process.env.URL_BASE, token);
-
-      enviarEmail(dadosForm.email_usuario, "Cadastro no site exemplo", null, html);
-
-      res.render("pages/cadastro", {
-        listaErros: null,
-        dadosNotificacao: {
-          titulo: "Cadastro realizado!",
-          mensagem: "Novo usuário criado com sucesso!",
-          tipo: "success",
-        },
-        valores: req.body,
+      enviarEmail(dadosForm.email_usuario, "Cadastro no site exemplo", null, html, ()=>{
+        res.render("pages/cadastro", {
+          listaErros: null,
+          dadosNotificacao: {
+            titulo: "Cadastro realizado!",
+            mensagem: "Novo usuário criado com sucesso!<br>"+
+            "Enviamos um e-mail para a ativação de sua conta",
+            tipo: "success",
+          },
+          valores: req.body,
+        });
       });
+      
     } catch (e) {
       console.log(e);
       res.render("pages/cadastro", {
@@ -286,7 +276,6 @@ const usuarioController = {
         if (err) {
           console.log({ message: "Token inválido ou expirado" });
         } else {
-
           const user = usuario.findInativoId(decoded.userId);
           if (!user) {
             console.log({ message: "Usuário não encontrado" });
@@ -493,5 +482,4 @@ const usuarioController = {
     }
   },
 };
-
 module.exports = usuarioController;

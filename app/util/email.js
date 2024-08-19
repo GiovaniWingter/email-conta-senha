@@ -4,24 +4,18 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER, // Seu e-mail
-        pass: process.env.EMAIL_PASS  // Sua senha ou app password
+        pass: process.env.EMAIL_PASS  // Sua senha, ou preferencialmente o senha configurada para App password
     },
     tls: {
         secure: false,
         ignoreTLS: true,
-        rejectUnauthorized: false, // ignorar certificado digital - APENAS EM PRODUÇÃO
-        // maxVersion: 'TLSv1.3',
-        // minVersion: 'TLSv1.2',
-        // ciphers: 'TLS_AES_128_GCM_SHA256',
+        rejectUnauthorized: false, // ignorar certificado digital - APENAS EM DESENVOLVIMENTO
     }
 
 });
 
-
-
 function enviarEmail(to, subject, text=null, html = null, callback) {
-
-
+    
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to,
@@ -39,7 +33,7 @@ function enviarEmail(to, subject, text=null, html = null, callback) {
         } else {
             console.log("email enviado");
             if (callback && typeof callback === 'function') {
-                // Chama a função de callback passando o resultado
+                // Chama a função de callback apenas em caso de sucesso no envio do e-mail
                 callback();
             } 
         }

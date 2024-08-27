@@ -31,8 +31,11 @@ router.post(
   }
 );
 
-router.get("/recuperar-senha", verificarUsuAutenticado, function(req, res){
-  res.render("pages/rec-senha",{ listaErros: null, dadosNotificacao: null });
+router.get("/recuperar-senha", 
+  verificarUsuAutenticado, 
+  function(req, res){
+    res.render("pages/rec-senha",
+      { listaErros: null, dadosNotificacao: null });
 });
 
 router.post("/recuperar-senha",

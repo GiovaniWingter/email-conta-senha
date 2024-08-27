@@ -106,7 +106,6 @@ router.get(
 );
 
 
-
 router.get(
   "/adm",
   verificarUsuAutenticado,
